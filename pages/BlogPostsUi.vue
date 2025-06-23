@@ -1,35 +1,102 @@
 <template>
-  <div class="container">
-    <div class="table-card">
+  <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl">
+      <div class="container max-w-8xl mx-auto p-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">Список постів</h1>
 
-      <div class="card-header">
-        <h2>NuxtUI таблиця</h2>
+          <NuxtLink
+              to="/admin/blog/posts/create"
+              class="inline-flex items-center gap-3 px-8 py-4 bg-white text-indigo-600 font-bold rounded-2xl shadow-xl transition-all duration-300 ease-in-out hover:bg-gray-50 hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/30 transform"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Додати новий пост
+          </NuxtLink>
+        </div>
       </div>
+    </div>
 
-      <div class="table-wrapper">
-        <UTable
-            ref="table"
-            v-model:pagination="pagination"
-            :data="posts"
-            :columns="columns"
-            :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-            class="main-table"
-            :thead-class="'table-thead'"
-            :tbody-tr-class="'table-row'"
-            :tbody-td-class="'table-cell'"
-            :th-class="'table-th'"
-        >
-          <template #status-data="{ row }">
-            <span :class="{'status-badge': true, 'status-published': row.status === 'Опубліковано', 'status-draft': row.status === 'Чернетка'}">
-              {{ row.status }}
-            </span>
+    <!-- Main Content Container -->
+    <div class="container max-w-8xl mx-auto p-8">
+      <!-- Main Table Card -->
+      <UCard class="bg-white rounded-3xl shadow-2xl border-0 overflow-hidden backdrop-blur-sm">
+        <template #header>
+          <div class="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <div class="p-2 bg-indigo-100 rounded-xl">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                  </div>
+                  Управління постами
+                </h2>
+                <p class="text-sm text-gray-600 mt-2">Перегляд та керування постами блогу в красивому інтерфейсі</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-xl text-sm font-medium">
+                  {{ posts.length }} постів
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <div class="min-h-[500px] flex items-center justify-center">
+          <template v-if="pending">
+            <div class="text-center py-16">
+              <div class="inline-flex items-center gap-3 text-xl text-indigo-600 font-semibold">
+                <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                Завантаження постів...
+              </div>
+            </div>
           </template>
-        </UTable>
-      </div>
+          <template v-else-if="error">
+            <div class="text-center py-16">
+              <div class="inline-flex items-center gap-3 text-xl text-red-600 font-semibold bg-red-50 px-6 py-4 rounded-2xl">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Помилка завантаження постів: {{ error.message }}
+              </div>
+            </div>
+          </template>
+          <template v-else-if="posts.length === 0">
+            <div class="text-center py-16">
+              <div class="mb-4">
+                <svg class="w-24 h-24 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="text-xl text-gray-500 font-medium">Постів поки що немає</div>
+              <p class="text-gray-400 mt-2">Створіть свій перший пост, щоб побачити його тут</p>
+            </div>
+          </template>
+          <template v-else>
+            <div class="w-full">
+              <UTable
+                  ref="table"
+                  v-model:pagination="pagination"
+                  :data="posts"
+                  :columns="columns"
+                  :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
+                  class="w-full"
+                  :thead-class="'bg-gradient-to-r from-indigo-50 to-purple-50'"
+                  :tbody-tr-class="(row) => getRowClass(row)"
+                  :tbody-td-class="'px-8 py-6 text-sm border-b border-gray-50'"
+                  :th-class="'px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-indigo-100'"
+              />
+            </div>
+          </template>
+        </div>
 
-      <div class="footer-pagination">
-        <div class="pagination-info-and-control">
-          <div class="pagination-label-centered"> Показано {{ ((pagination.pageIndex) * pagination.pageSize) + 1 }} по
+        <div v-if="!pending && !error && posts.length > 0" class="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 flex items-center justify-between min-h-[80px] flex-wrap">
+          <div class="text-sm text-gray-600 font-medium bg-white px-4 py-2 rounded-xl shadow-sm">
+            Показано {{ ((pagination.pageIndex) * pagination.pageSize) + 1 }} -
             {{ Math.min((pagination.pageIndex + 1) * pagination.pageSize, posts.length) }}
             з {{ posts.length }} результатів
           </div>
@@ -38,304 +105,250 @@
               :items-per-page="table?.tableApi?.getState().pagination.pageSize"
               :total="table?.tableApi?.getFilteredRowModel().rows.length"
               @update:page="p => table?.tableApi?.setPageIndex(p - 1)"
-              class="page-select"
+              :max="5"
+              :active-button="{ variant: 'solid', color: 'indigo' }"
+              :inactive-button="{ color: 'gray', variant: 'ghost' }"
+              show-first
+              show-last
+              class="ml-auto"
           />
         </div>
-      </div>
-
+      </UCard>
     </div>
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getPaginationRowModel } from '@tanstack/vue-table'
-import type { TableColumn } from '@nuxt/ui'
+import { ref, h } from 'vue';
+import { getPaginationRowModel } from '@tanstack/vue-table';
+import type { TableColumn } from '@nuxt/ui';
 
-const table = ref()
+const table = ref();
 
 type Post = {
-  id: string
-  name: string
-  category: string
-  title: string
-  date: string
-  status: 'Опубліковано' | 'Чернетка'
-}
+  id: string;
+  name: string;
+  category: string;
+  title: string;
+  date: string;
+  is_published: boolean;
+  slug: string;
+};
 
-const posts = ref<Post[]>([])
+const posts = ref<Post[]>([]);
+const config = useRuntimeConfig();
 
-const getPosts = async () => {
+const getRowClass = (row: any) => {
+  const isPublished = row.original.is_published;
+  return isPublished
+      ? 'bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-lg transform transition-all duration-300 ease-in-out cursor-pointer border-l-4 border-l-transparent hover:border-l-blue-500'
+      : 'bg-gradient-to-r from-amber-50 to-yellow-50 text-gray-700 hover:from-amber-100 hover:to-yellow-100 hover:shadow-lg transform transition-all duration-300 ease-in-out cursor-pointer border-l-4 border-l-amber-400';
+};
+
+const handleRowClick = async (post: Post) => {
   try {
-    let allPosts: Post[] = []
-    let currentPage = 1
-    let lastPage = 1
-
-    do {
-      const response = await $fetch(`http://localhost/api/blog/posts?page=${currentPage}`)
-      const pagePosts = response.data.map((post: any) => ({
-        id: String(post.id),
-        name: post.user?.name || 'Невідомий автор',
-        category: post.category?.title || 'Без категорії',
-        title: post.title,
-        date: post.published_at,
-        status: Math.random() > 0.5 ? 'Опубліковано' : 'Чернетка'
-      })) as Post[]
-
-      allPosts = allPosts.concat(pagePosts)
-      lastPage = response.meta.last_page
-      currentPage++
-    } while (currentPage <= lastPage)
-
-    posts.value = allPosts
+    console.log('Navigating to:', `/blog/${post.slug}?source=nuxt-ui`);
+    await navigateTo(`/blog/${post.slug}?source=nuxt-ui`);
   } catch (error) {
-    console.error('Помилка отримання дописів:', error)
+    console.error('Navigation error:', error);
+    window.location.href = `/blog/${post.slug}?source=nuxt-ui`;
   }
-}
+};
 
-getPosts()
+const handleDeleteClick = async (post: Post) => {
+  const confirmed = confirm(`Ви впевнені, що хочете видалити пост "${post.title}"? Цю дію неможливо скасувати.`);
+
+  if (!confirmed) return;
+
+  try {
+    await $fetch(`${config.public.apiBase}/blog/posts/${post.slug}`, {
+      method: 'DELETE'
+    });
+
+    posts.value = posts.value.filter(p => p.slug !== post.slug);
+
+    alert('Пост успішно видалено!');
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('Помилка при видаленні поста');
+  }
+};
+
+const { data, pending, error, refresh } = await useAsyncData(
+    'all-blog-posts',
+    async () => {
+      let allPosts: Post[] = [];
+      let currentPage = 1;
+      let lastPage = 1;
+
+      do {
+        const response: any = await $fetch(`${config.public.apiBase}/blog/posts?page=${currentPage}`);
+        const pagePosts = response.data.map((post: any) => ({
+          id: String(post.id),
+          name: post.user?.name || '',
+          category: post.category?.title || '',
+          title: post.title,
+          date: post.published_at,
+          is_published: post.is_published,
+          slug: post.slug
+        })) as Post[];
+
+        allPosts = allPosts.concat(pagePosts);
+        lastPage = response.meta.last_page;
+        currentPage++;
+      } while (currentPage <= lastPage);
+
+      return allPosts;
+    }
+);
+
+if (data.value) {
+  posts.value = data.value;
+}
 
 const columns: TableColumn<Post>[] = [
   {
     accessorKey: 'id',
-    header: '#',
-    cell: ({ row }) => `#${row.getValue('id')}`
-  },
-  {
-    accessorKey: 'date',
-    header: 'Дата',
-    cell: ({ row }) => {
-      return new Date(row.getValue('date')).toLocaleString('uk-UA', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric', // Додано відображення року
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-    }
+    header: '🆔 ID',
+    cell: ({ row }) => h('div', {
+      onClick: () => handleRowClick(row.original),
+      class: 'cursor-pointer w-full h-full flex items-center font-mono text-indigo-600 font-semibold'
+    }, `#${row.getValue('id')}`)
   },
   {
     accessorKey: 'name',
-    header: 'Автор'
+    header: '👤 Автор',
+    cell: ({ row }) => h('div', {
+      onClick: () => handleRowClick(row.original),
+      class: 'cursor-pointer w-full h-full flex items-center font-medium'
+    }, row.getValue('name') || 'Невідомий автор')
   },
   {
     accessorKey: 'category',
-    header: 'Категорія'
+    header: '📂 Категорія',
+    cell: ({ row }) => {
+      const category = row.getValue('category');
+      return h('div', {
+        onClick: () => handleRowClick(row.original),
+        class: 'cursor-pointer w-full h-full flex items-center'
+      }, [
+        h('span', {
+          class: 'px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold border border-purple-200'
+        }, category || 'Без категорії')
+      ]);
+    }
   },
   {
     accessorKey: 'title',
-    header: 'Заголовок'
+    header: '📄 Заголовок',
+    cell: ({ row }) => {
+      const postTitle = row.getValue('title');
+      return h('div', {
+        class: 'cursor-pointer text-gray-800 font-semibold hover:text-indigo-600 transition-colors duration-300 w-full h-full flex items-center break-words',
+        onClick: () => handleRowClick(row.original)
+      }, postTitle);
+    }
   },
   {
-    accessorKey: 'status',
-    header: 'Статус'
+    accessorKey: 'date',
+    header: '📅 Дата публікації',
+    cell: ({ row }) => {
+      const dateValue = row.getValue('date');
+      const formattedDate = dateValue ? new Date(dateValue).toLocaleString('uk-UA', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }) : 'Немає';
+      return h('div', {
+        onClick: () => handleRowClick(row.original),
+        class: 'cursor-pointer w-full h-full flex items-center font-mono text-sm text-gray-600'
+      }, formattedDate);
+    }
+  },
+  {
+    accessorKey: 'is_published',
+    header: '🚀 Статус',
+    cell: ({ row }) => {
+      const isPublished = row.getValue('is_published');
+      return h('div', {
+        onClick: () => handleRowClick(row.original),
+        class: 'cursor-pointer w-full h-full flex items-center',
+        innerHTML: `<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap text-center min-w-[120px] shadow-sm ${isPublished ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white border border-green-300' : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border border-red-300'}">${isPublished ? '✅ Опубліковано' : '⏳ Чернетка'}</span>`
+      });
+    }
+  },
+  {
+    accessorKey: 'actions',
+    header: '⚡ Дії',
+    cell: ({ row }) => {
+      const postSlug = row.original.slug;
+
+      return h('div', {
+        class: 'flex justify-center items-center gap-3'
+      }, [
+        h('button', {
+          class: 'px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white border border-blue-400 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 ease-in-out hover:from-blue-600 hover:to-indigo-700 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-md',
+          onClick: async (e: Event) => {
+            e.stopPropagation();
+            try {
+              await navigateTo(`/admin/blog/posts/${postSlug}/edit`);
+            } catch (error) {
+              console.error('Edit navigation error:', error);
+              window.location.href = `/admin/blog/posts/${postSlug}/edit`;
+            }
+          }
+        }, '✏️ Редагувати'),
+        h('button', {
+          class: 'px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white border border-red-400 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 ease-in-out hover:from-red-600 hover:to-pink-700 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-300 shadow-md',
+          onClick: (e: Event) => {
+            e.stopPropagation();
+            handleDeleteClick(row.original);
+          }
+        }, '🗑️ Видалити')
+      ]);
+    }
   }
-]
+];
 
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10
-})
+});
 </script>
 
 <style scoped>
-.container {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.table-card {
-  max-width: 100%;
-  margin: 0 auto;
-  border-radius: 1rem;
-  background-color: #ffffff;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+.table-fixed :deep(th),
+.table-fixed :deep(td) {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 
-.card-header {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1a202c;
-  padding: 1.75rem 2.5rem;
-  position: relative;
-  margin-bottom: 0;
-  background-color: #fcfdfe;
+.table-fixed :deep(td > .break-words) {
+  white-space: normal;
+  word-break: break-word;
 }
 
-.header-subtitle {
-  font-size: 1.05rem;
-  color: #6b7280;
-  margin-top: 0.6rem;
+/* Custom scrollbar */
+:deep(.overflow-x-auto)::-webkit-scrollbar {
+  height: 8px;
 }
 
-.card-header::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: linear-gradient(to right, rgba(237, 242, 247, 0) 5%, #e2e8f0 50%, rgba(237, 242, 247, 0) 95%);
+:deep(.overflow-x-auto)::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
-.table-wrapper {
-  overflow-x: auto;
+:deep(.overflow-x-auto)::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 4px;
 }
 
-.main-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.main-table :deep(thead) {
-  background-color: #f8fafd;
-}
-
-.main-table :deep(th) {
-  padding: 1.25rem 2.5rem;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #4a5568;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.main-table :deep(tbody tr) {
-  border-bottom: 1px solid #f0f4f8;
-  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.main-table :deep(tbody tr:hover) {
-  background-color: #fbfbfc;
-  box-shadow: inset 4px 0 0 0 #3b82f6;
-}
-
-.main-table :deep(td) {
-  padding: 1.5rem 2.5rem;
-  font-size: 0.95rem;
-  color: #374151;
-}
-
-.main-table :deep(td:nth-child(2)) {
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.status-published {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.status-draft {
-  background-color: #fff1e0;
-  color: #9a6700;
-}
-
-.footer-pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem 2.5rem;
-  background-color: #fcfdfe;
-  min-height: 60px;
-  flex-wrap: nowrap;
-  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.04), 0 -2px 8px rgba(0, 0, 0, 0.02);
-  border-bottom-left-radius: 0.9rem;
-  border-bottom-right-radius: 0.9rem;
-}
-
-.pagination-info-and-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-}
-
-.pagination-label-centered {
-  font-size: 0.95rem;
-  color: #6b7280;
-  white-space: nowrap;
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.footer-pagination :deep(.upagination) {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.footer-pagination :deep(.upagination button) {
-  background-color: white;
-  border: 1px solid #d8dce2;
-  padding: 0.6rem 0.9rem;
-  border-radius: 0.35rem;
-  font-size: 0.95rem;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  min-width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  white-space: nowrap;
-  flex-shrink: 0;
-  box-shadow: none;
-}
-
-.footer-pagination :deep(.upagination button:first-child),
-.footer-pagination :deep(.upagination button:last-child) {
-  font-weight: 600;
-  color: #4a5568;
-}
-
-.footer-pagination :deep(.upagination button:hover:not(:disabled)) {
-  background-color: #f0f4f8;
-  border-color: #c9d6e4;
-  transform: none;
-  box-shadow: none;
-}
-
-.footer-pagination :deep(.upagination button[aria-current='true']) {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  font-weight: 600;
-  box-shadow: none;
-  transform: none;
-}
-
-.footer-pagination :deep(.upagination button:disabled) {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: #fcfdfe;
-  color: #a0a8b2;
-  box-shadow: none;
-  transform: none;
-  border: 1px solid #e0e0e0;
+:deep(.overflow-x-auto)::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
 }
 </style>
